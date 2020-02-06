@@ -36,23 +36,20 @@ def create_new_children(parent_solution1, parent_solution2, n_crossover):
                 child_a[i] += first
             
             # do n-point crossover
-        # elif n_crossover == 2:
-        #     # make one child first, second one by inversing
-        #     possible_position = np.arange(len(pa1))
-        #     crossover_indices = np.random.choice(possible_position, n_crossover, replace=False)
-        #     first_block = pa1[0:crossover_indices[0]]
-        #     second_block = pa2[crossover_indices[0]:crossover_indices[1]]
-        #     third_block = pa1[crossover_indices[1]:len(pa1)]
-        #     child_a = np.concatenate((first_block, second_block, third_block))
-        #     # print(len(child_a))
+
         elif n_crossover == 2:
             child_a = np.zeros(len(pa1),dtype=bool)
             # define edges for crossover points
             borders = np.random.randint(0, high=100, size=2)
             first_border, second_border = borders[0], borders[1]
-            child_a[0:first_border] += pa1[0:first_border]
-            child_a[first_border:second_border] += pa2[first_border:second_border]
-            child_a[second_border:len(pa1)] += pa1[second_border:len(pa1)]
+            if int(np.random.randint(0,high=100,size=1)) > 50:
+                child_a[0:first_border] += pa1[0:first_border]
+                child_a[first_border:second_border] += pa2[first_border:second_border]
+                child_a[second_border:len(pa1)] += pa1[second_border:len(pa1)]
+            else:
+                child_a[0:first_border] += pa2[0:first_border]
+                child_a[first_border:second_border] += pa1[first_border:second_border]
+                child_a[second_border:len(pa1)] += pa2[second_border:len(pa1)]
             
               
                 
