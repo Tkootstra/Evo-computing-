@@ -29,11 +29,16 @@ def create_new_children(parent_solution1, parent_solution2, n_crossover):
          # do uniform crossover
         if n_crossover == 0:
         # make one child first, then inverse to make second one
-            child_a = np.zeros(len(pa1))
+            child_a = np.zeros(len(pa1), dtype=bool)
+            child_b = np.zeros(len(pa1), dtype=bool)
     
             for i, (a,b) in enumerate(zip(pa1, pa2)):
-                first = np.random.choice(list((a,b)),1, replace=False)[0]
+                first = np.random.choice(list((a,b)),1, replace=True)[0]
+                second = np.random.choice(list((a,b)),1, replace=True)[0]
                 child_a[i] += first
+                child_b[i] += second
+                
+            return Solution(child_a), Solution(child_b)
             
             # do n-point crossover
 
@@ -50,6 +55,10 @@ def create_new_children(parent_solution1, parent_solution2, n_crossover):
                 child_a[0:first_border] += pa2[0:first_border]
                 child_a[first_border:second_border] += pa1[first_border:second_border]
                 child_a[second_border:len(pa1)] += pa2[second_border:len(pa1)]
+            child_b = np.array(1-child_a)
+            if len(child_b) > 100 or len(child_a) > 100:
+                print('AHAAAAAAAAAHHH')
+            return Solution(child_a), Solution(child_b)
             
               
                 
@@ -57,10 +66,7 @@ def create_new_children(parent_solution1, parent_solution2, n_crossover):
             raise ValueError('{}-point crossover is currently not supported'.format(n_crossover))
                 
         
-        child_b = np.array(1-child_a)
-        if len(child_b) > 100 or len(child_a) > 100:
-            print('AHAAAAAAAAAHHH')
-        return Solution(child_a), Solution(child_b)
+        
     
 class Population():
     
