@@ -64,21 +64,25 @@ def create_new_children(parent_solution1, parent_solution2, n_crossover):
         elif n_crossover == 2:
             child_a = np.zeros(len(pa1),dtype=bool)
             # define edges for crossover points
-            borders = np.random.randint(0, high=100, size=2)
+            borders = np.random.randint(0, high=len(pa1), size=2)
             first_border, second_border = borders[0], borders[1]
             
-            if int(np.random.randint(0,high=100,size=1)) > 50:
-                child_a[0:first_border] += pa1[0:first_border]
-                child_a[first_border:second_border] += pa2[first_border:second_border]
-                child_a[second_border:len(pa1)] += pa1[second_border:len(pa1)]
-            else:
-                child_a[0:first_border] += pa2[0:first_border]
-                child_a[first_border:second_border] += pa1[first_border:second_border]
-                child_a[second_border:len(pa1)] += pa2[second_border:len(pa1)]
+            child_a[0:first_border] = pa1[0:first_border]
+            child_a[first_border:second_border] = pa2[first_border:second_border]
+            child_a[second_border:len(pa1)] = pa1[second_border:len(pa1)]
             
-            child_b = np.array(1-child_a)
+            # if int(np.random.randint(0,high=100,size=1)) > 50:
+            #     child_a[0:first_border] += pa1[0:first_border]
+            #     child_a[first_border:second_border] += pa2[first_border:second_border]
+            #     child_a[second_border:len(pa1)] += pa1[second_border:len(pa1)]
+            # else:
+            #     child_a[0:first_border] += pa2[0:first_border]
+            #     child_a[first_border:second_border] += pa1[first_border:second_border]
+            #     child_a[second_border:len(pa1)] += pa2[second_border:len(pa1)]
             
-            if len(child_b) != 100 or len(child_a) != 100:
+            child_b = np.invert(child_a)
+            
+            if len(child_b) != len(pa1) or len(child_a) != len(pa1):
                 print('AHAAAAAAAAAHHH') # haha
             
             return Solution(child_a), Solution(child_b)   
@@ -141,12 +145,18 @@ class Population():
             candidates.append(self.solutions[i+1])
             candidates.append(self.offspring[i])
             candidates.append(self.offspring[i+1])
+            
+            # for cand in candidates:
+            #     print(cand.value_vector)
+            
             # check the fittest solutions for this family
             function_values = np.array([valuefunc(sol) for sol in candidates])
-            best_idx = function_values.argsort()[-2:]
+            best_idx = function_values.argsort()#[-2:]
+            
             # append 2 best solution to list
             best_children.append(candidates[best_idx[0]])
             best_children.append(candidates[best_idx[1]])
+        
         return best_children
 
 

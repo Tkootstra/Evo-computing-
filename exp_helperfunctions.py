@@ -18,7 +18,7 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
     for x in range(n_iters):
         start = time.time()
         
-        res = {key: [] for key in ['Pop_size', 'best_fitness', 'generation_iter', 'num_gens']}
+        res = {key: [] for key in ['Pop_size', 'best_fitness', 'generation_iter']}
         
         N = pop_start_size
         num_gens = 1
@@ -44,13 +44,13 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
             best_offspring = first_gen.family_competition(valuefunc = value_func)
             
             # Build new generation and check fitness
-            new_gen = Builder.Population(solutions_list=best_offspring, previous_iter=0)
+            new_gen = Builder.Population(solutions_list=best_offspring, previous_iter=1)
             optimum_found = new_gen.global_optimum_reached(optimum = global_optimum, valuefunc = value_func)
             next_optimum = new_gen.best_solution_fitness(valuefunc = value_func)
             
             gen_x = new_gen
         
-            while not optimum_found and current_optimum <= next_optimum:
+            while not optimum_found and current_optimum < next_optimum:
                 current_optimum = next_optimum
                 
                 # do single iteration
@@ -66,6 +66,7 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
                     
                 gen_x = new_gen
                 num_gens += 1
+                # print(num_gens)
             
             res['Pop_size'].append(N)
             res['best_fitness'].append(current_optimum)
@@ -78,11 +79,15 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
         global_res['iter'].append(x)
         global_res['max_fitness'].append(max(res['best_fitness']))
         
+        fitness = (max(res['best_fitness']) / global_optimum) * 100
+        mean_gens = np.mean(res['generation_iter'])
+        
         end = time.time()
-        print('{0}: Found global fitness max of {1}, N={2}. ({3:.2f}s)'.format(x + 1, 
-                                                                       max(res['best_fitness']),
+        print('{0}: Found global fitness max of {1:.0f}%, N={2}. ({3:.2f}s, {4:.2f} gens)'.format(x + 1, 
+                                                                       fitness,
                                                                        last_N,
-                                                                       end - start))
+                                                                       end - start,
+                                                                       mean_gens))
         
     return global_res
     

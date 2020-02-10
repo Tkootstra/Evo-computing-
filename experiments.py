@@ -13,7 +13,7 @@ POP_START = 10
 POP_MAX = 1280
 N_ITERS = 5
 STRING_LENGTH = 100
-GLOBAL_OPTIMUM = 100
+GLOBAL_OPTIMUM = STRING_LENGTH
 
 # =============================================================================
 # #1 - counting ones valuefunc with 2X crossover
