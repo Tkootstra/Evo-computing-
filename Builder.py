@@ -10,6 +10,7 @@ Created on Thu Feb  6 12:23:03 2020
 # =============================================================================
 import numpy as np
 import random
+from joblib import Parallel, delayed 
 
 class Solution():
     
@@ -38,11 +39,18 @@ def non_dec_linked_trap_fitness(solution, k=4, d=2.5):
         return co
     else:
         return k - d - ((k - d) / (k - 1)) * co
-    
 
-def create_new_children(parent_solution1, parent_solution2, n_crossover):
-        pa1 = parent_solution1.value_vector
-        pa2 = parent_solution2.value_vector
+# TODO: Non-linked functions
+
+def mutate(solution):
+        # mutate_location = np.random.randint(0, len(solution), 1)[0]
+        # solution[mutate_location] = np.invert(solution[mutate_location])
+        
+        return solution
+
+def create_new_children(parents, n_crossover):
+        pa1 = parents[0].value_vector
+        pa2 = parents[1].value_vector
         
         # do uniform crossover
         if n_crossover == 0:
@@ -56,20 +64,19 @@ def create_new_children(parent_solution1, parent_solution2, n_crossover):
                 second = np.random.choice(options, 1)[0]
                 child_a[i] += first
                 child_b[i] += second
-                
-            return Solution(child_a), Solution(child_b)
             
-            # do n-point crossover
-
+            # child_a = mutate(child_a)
+            # child_b = mutate(child_b)
+            
+            return Solution(child_a), Solution(child_b)
+        
+        # do 2-point crossover
         elif n_crossover == 2:
             child_a = np.zeros(len(pa1),dtype=bool)
             # define edges for crossover points
             borders = np.random.randint(0, high=len(pa1), size=2)
             first_border, second_border = borders[0], borders[1]
-            
-            child_a[0:first_border] = pa1[0:first_border]
-            child_a[first_border:second_border] = pa2[first_border:second_border]
-            child_a[second_border:len(pa1)] = pa1[second_border:len(pa1)]
+
             
             # if int(np.random.randint(0,high=100,size=1)) > 50:
             #     child_a[0:first_border] += pa1[0:first_border]
@@ -80,7 +87,14 @@ def create_new_children(parent_solution1, parent_solution2, n_crossover):
             #     child_a[first_border:second_border] += pa1[first_border:second_border]
             #     child_a[second_border:len(pa1)] += pa2[second_border:len(pa1)]
             
+            child_a[0:first_border] = pa1[0:first_border]
+            child_a[first_border:second_border] = pa2[first_border:second_border]
+            child_a[second_border:len(pa1)] = pa1[second_border:len(pa1)]
+            
             child_b = np.invert(child_a)
+            
+            # child_a = mutate(child_a)
+            # child_b = mutate(child_b)
             
             if len(child_b) != len(pa1) or len(child_a) != len(pa1):
                 print('AHAAAAAAAAAHHH') # haha
@@ -101,6 +115,10 @@ class Population():
         self.new_pairs = []
         self.offspring = []
         self.population_size = len(solutions_list)
+
+    def get_fitness(self, optimum, valuefunc):
+        return (self.global_optimum_reached(optimum, valuefunc), 
+                self.best_solution_fitness(valuefunc))
     
     def global_optimum_reached(self, optimum, valuefunc):
         function_values = [valuefunc(sol) for sol in self.solutions]
@@ -115,7 +133,13 @@ class Population():
             values.append(value)
         
         return max(values)
+
+    def step_gen(self, crossover_operator, valuefunc, cores):
+        self.shuffle_population()
+        self.pair_solutions()
+        self.create_offspring(crossover_operator, cores=cores)
         
+        return self.family_competition(valuefunc)
         
     def shuffle_population(self):
         sols = self.solutions
@@ -128,11 +152,23 @@ class Population():
             parent_two = self.solutions[i+1]
             self.new_pairs.append((parent_one, parent_two))
 
-    def create_offspring(self, crossover_operator):
-        for pa1, pa2 in self.new_pairs:
-            first_child, second_child = create_new_children(pa1,pa2, crossover_operator)
-            self.offspring.append(first_child)
-            self.offspring.append(second_child)
+    def create_offspring(self, crossover_operator, cores):
+        if cores == 1:
+            for parent in self.new_pairs:            
+                first_child, second_child = create_new_children(parent, crossover_operator)
+                self.offspring.append(first_child)
+                self.offspring.append(second_child) 
+       
+        else:
+            xovers = [crossover_operator] * len(self.new_pairs)
+            
+            children = Parallel(n_jobs=-2, backend='loky', verbose=False)(
+                delayed(create_new_children)(pa, xover) for pa, xover in zip(self.new_pairs, xovers))
+            
+            for c1, c2 in children:
+                self.offspring.append(c1)
+                self.offspring.append(c2)
+                
     
     def family_competition(self, valuefunc):
         
@@ -151,7 +187,7 @@ class Population():
             
             # check the fittest solutions for this family
             function_values = np.array([valuefunc(sol) for sol in candidates])
-            best_idx = function_values.argsort()#[-2:]
+            best_idx = function_values.argsort()[::-1]
             
             # append 2 best solution to list
             best_children.append(candidates[best_idx[0]])
