@@ -23,6 +23,22 @@ class Solution():
 def counting_ones_fitness_func(solution):
     return np.sum(solution.value_vector)
 
+def dec_linked_trap_fitness(solution, k=4, d=1):
+    co = counting_ones_fitness_func(solution)
+    if co % k == 0 and co > 0:
+        return co
+    else:
+        return k - d - ((k - d) / (k - 1)) * co
+
+
+def non_dec_linked_trap_fitness(solution, k=4, d=2.5):
+    co = counting_ones_fitness_func(solution)
+    if co % k == 0 and co > 0:
+        return co
+    else:
+        return k - d - ((k - d) / (k - 1)) * co
+    
+
 def create_new_children(parent_solution1, parent_solution2, n_crossover):
         pa1 = parent_solution1.value_vector
         pa2 = parent_solution2.value_vector

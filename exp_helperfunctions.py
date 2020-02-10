@@ -25,12 +25,12 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
         
         first_gen.shuffle_population()
         first_gen.pair_solutions()
-        first_gen.create_offspring(crossover_operator=0)
+        first_gen.create_offspring(crossover_operator=crossover_operator)
         best_offspring = first_gen.family_competition(valuefunc = value_func)
         new_gen = Builder.Population(solutions_list=best_offspring, previous_iter=0)
         gen_x = new_gen
     
-        while not optimum_found and N <= 1280:
+        while not optimum_found and N <= pop_max_size:
             # log information for each iteration
             opt_reached = gen_x.global_optimum_reached(optimum = global_optimum, valuefunc = value_func)
             optimum_found = opt_reached
@@ -38,20 +38,24 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
             res['Pop_size'].append(N)
             res['best_fitness'].append(current_optimum)
             res['generation_iter'].append(gen_x.current_iter)
+            
             # do single iteration
             gen_x.shuffle_population()
             gen_x.pair_solutions()
-            gen_x.create_offspring(crossover_operator=2)
+            gen_x.create_offspring(crossover_operator=crossover_operator)
             best_offspring = gen_x.family_competition(valuefunc = value_func)
             new_gen = Builder.Population(solutions_list=best_offspring, previous_iter = gen_x.current_iter)
+            
             # check if next gen has a higher fitness function than current. if this is false, increase pop size (N)
             next_optimum = new_gen.best_solution_fitness(valuefunc = value_func)
-            if current_optimum == next_optimum:
+            
+            if current_optimum >= next_optimum:
                 # print('stuck in local optimum for fitness value of {}.\
                 #       Upscaling N from {} to {}'.format(next_optimum, N, N+10))
-                N+=10
+                N *= 2
                 
             gen_x = new_gen
+        
         global_res['res_dict'].append(res)
         global_res['iter'].append(x)
         global_res['max_fitness'].append(max(res['best_fitness']))
