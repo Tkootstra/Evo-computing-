@@ -17,6 +17,7 @@ class Solution():
         
         self.value_vector = np.array(values, dtype=bool)
         self.length = len(self.value_vector)
+
 # =============================================================================
 #     fitness functions
 # =============================================================================
@@ -42,15 +43,17 @@ def non_dec_linked_trap_fitness(solution, k=4, d=2.5):
 def create_new_children(parent_solution1, parent_solution2, n_crossover):
         pa1 = parent_solution1.value_vector
         pa2 = parent_solution2.value_vector
-         # do uniform crossover
+        
+        # do uniform crossover
         if n_crossover == 0:
-        # make one child first, then inverse to make second one
             child_a = np.zeros(len(pa1), dtype=bool)
             child_b = np.zeros(len(pa1), dtype=bool)
     
-            for i, (a,b) in enumerate(zip(pa1, pa2)):
-                first = np.random.choice(list((a,b)),1, replace=True)[0]
-                second = np.random.choice(list((a,b)),1, replace=True)[0]
+            for i, (a, b) in enumerate(zip(pa1, pa2)):
+                options = [a, b]
+                
+                first = np.random.choice(options, 1)[0]
+                second = np.random.choice(options, 1)[0]
                 child_a[i] += first
                 child_b[i] += second
                 
@@ -63,6 +66,7 @@ def create_new_children(parent_solution1, parent_solution2, n_crossover):
             # define edges for crossover points
             borders = np.random.randint(0, high=100, size=2)
             first_border, second_border = borders[0], borders[1]
+            
             if int(np.random.randint(0,high=100,size=1)) > 50:
                 child_a[0:first_border] += pa1[0:first_border]
                 child_a[first_border:second_border] += pa2[first_border:second_border]
@@ -71,12 +75,13 @@ def create_new_children(parent_solution1, parent_solution2, n_crossover):
                 child_a[0:first_border] += pa2[0:first_border]
                 child_a[first_border:second_border] += pa1[first_border:second_border]
                 child_a[second_border:len(pa1)] += pa2[second_border:len(pa1)]
-            child_b = np.array(1-child_a)
-            if len(child_b) > 100 or len(child_a) > 100:
-                print('AHAAAAAAAAAHHH')
-            return Solution(child_a), Solution(child_b)
             
-              
+            child_b = np.array(1-child_a)
+            
+            if len(child_b) != 100 or len(child_a) != 100:
+                print('AHAAAAAAAAAHHH') # haha
+            
+            return Solution(child_a), Solution(child_b)   
                 
         else:
             raise ValueError('{}-point crossover is currently not supported'.format(n_crossover))
