@@ -194,6 +194,15 @@ class Population():
             best_children.append(candidates[best_idx[1]])
         
         return best_children
+    
+    def proportion_bits1_population(self):
+        total_sum = 0
+        length = self.solutions[0].length
+        for sol in self.solutions:
+            total_sum += counting_ones_fitness_func(sol)
+        return total_sum / (length * self.population_size)
+    
+        
 
 
 

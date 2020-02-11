@@ -8,6 +8,7 @@ Created on Thu Feb  6 17:22:08 2020
 import Builder as Builder
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 
 def create_solutions(n, string_length):
     sols = []
@@ -28,7 +29,7 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
     for x in range(n_iters):
         start = time.time()
         
-        res = {key: [] for key in ['Pop_size', 'best_fitness', 'generation_iter']}
+        res = {key: [] for key in ['Pop_size', 'best_fitness', 'generation_iter', 'proportions']}
         
         N = pop_start_size
         optimum_found = False
@@ -63,10 +64,13 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
 
                 gen_x = new_gen
                 num_gens += 1
+                
             
             res['Pop_size'].append(N)
             res['best_fitness'].append(next_optimum)
             res['generation_iter'].append(gen_x.current_iter)
+            res['proportions'].append(gen_x.proportion_bits1_population())
+            
             
             last_N = N
             N *= 2
@@ -75,6 +79,10 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
         ### Optimum was found. Do bisection search ###
         ##############################################            
         if optimum_found:
+            # do plotting
+            plt.figure(figsize=(10,10), dpi=300)
+            plt.plot(res['generation_iter'], res['proportions'])
+            plt.show()
             stepsize = (last_N - last_N / 2) / 2
             N = last_N - stepsize
             

@@ -50,7 +50,7 @@ results_2a = exp_helperfunctions.run_exp(pop_start_size=POP_START, pop_max_size=
 print('\nEXPERIMENT 2: UX')
 results_2b = exp_helperfunctions.run_exp(pop_start_size=POP_START, pop_max_size=POP_MAX,\
             n_iters=N_ITERS, string_length=STRING_LENGTH,value_func=Builder.dec_linked_trap_fitness,\
-            global_optimum = GLOBAL_OPTIMUM, crossover_operator=0, max_gens=MAX_GENS, n_cores=N_CORES) 
+            global_optimum = GLOBAL_OPTIMUM, crossover_operator=0, max_gens=MAX_GENS) 
     
 
 # =============================================================================
@@ -68,7 +68,7 @@ results_3a = exp_helperfunctions.run_exp(pop_start_size=POP_START, pop_max_size=
 print('\nEXPERIMENT 3: UX')
 results_3b = exp_helperfunctions.run_exp(pop_start_size=POP_START, pop_max_size=POP_MAX,\
             n_iters=N_ITERS, string_length=STRING_LENGTH,value_func=Builder.non_dec_linked_trap_fitness,\
-            global_optimum = GLOBAL_OPTIMUM, crossover_operator=0, max_gens=MAX_GENS, n_cores=N_CORES) 
+            global_optimum = GLOBAL_OPTIMUM, crossover_operator=0, max_gens=MAX_GENS) 
 
     
     
