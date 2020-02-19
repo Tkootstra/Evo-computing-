@@ -152,7 +152,7 @@ class Population():
         self.new_pairs = []
         self.offspring = []
         self.population_size = len(solutions_list)
-        
+        self.best_children = []
         self.fitness = None
         
 
@@ -183,7 +183,8 @@ class Population():
         self.pair_solutions()
         self.create_offspring(crossover_operator, cores=cores)
         
-        return self.family_competition(valuefunc)
+        self.family_competition(valuefunc)
+        return self.best_children
         
     def shuffle_population(self):
         sols = self.solutions
@@ -226,7 +227,15 @@ class Population():
             candidates.append(self.solutions[i+1])
             candidates.append(self.offspring[i])
             candidates.append(self.offspring[i+1])
+# <<<<<<< Updated upstream
           
+# =======
+#             # TODO: als de fitness van een parent gelijk is aan fitness van child, stuur de child door, de parent niet..
+#             # for cand in candidates:
+#             #     print(cand.value_vector)
+            
+#             # check the fittest solutions for this family
+# >>>>>>> Stashed changes
             function_values = np.array([valuefunc(sol) for sol in candidates])
             # check if fitness of any children is equal to one of the parents, 
             # if this is true, delete from possible candidates
@@ -255,7 +264,7 @@ class Population():
             #     function_values.pop(max_idx)
             #     best_children.append(best_sol)
                 
-        return best_children
+        self.best_children =  best_children
     
     def proportion_bits1_population(self):
         total_sum = 0
@@ -263,6 +272,31 @@ class Population():
         for sol in self.solutions:
             total_sum += counting_ones_fitness_func(sol)
         return total_sum / (length * self.population_size)
+    
+    def number_of_selection_errors(self):
+        # after family competition, check if one of selection error did occur.
+        # selection error is when at a certain index, one parent has 1, other
+        # parent has 0, and the offspring of those parents has a 0 at that index location
+        selection_error = 0
+        selection_correct = 0
+        if self.best_children is []:
+            raise ValueError("must have made definitive offspring first before\
+                             checking selection errors")
+                             
+        for i in range(0,len(self.best_children), 2):
+            pa1,pa2 = self.solutions[i], self.solutions[i+1]
+            ch1, chi2 = self.best_children[i], self.best_children[i+1]
+            diff_idx = list(np.argwhere((pa2-pa1) != 0).flatten())
+            for idx in diff_idx:
+                for child in [ch1, chi2]:
+                    if child[idx] == 0:
+                        selection_error+=1
+                    else:
+                        selection_correct+=1
+        return selection_correct, selection_error
+                    
+            
+            
     
         
 
