@@ -11,6 +11,7 @@ Created on Thu Feb  6 12:23:03 2020
 import numpy as np
 import random
 from joblib import Parallel, delayed 
+import time
 
 class Solution():
     
@@ -78,72 +79,64 @@ def non_dec_non_linked_trap_fitness(solution):
     return sum(fitness)
 
 # =============================================================================
-# Crossover function
+# Crossover functions
 # =============================================================================
+def n_point_xover(pa1, pa2):
+    parent_length = len(pa1)
+    
+    child_a = np.zeros(parent_length,dtype=bool)
+    child_b = np.zeros(parent_length,dtype=bool)
+    
+    # define edges for crossover points
+    borders = np.random.randint(0, high=parent_length, size=2)
+    first_border, second_border = borders[0], borders[1]
+    
+    # Create child a
+    child_a[0:first_border] = pa1[0:first_border]
+    child_a[first_border:second_border] = pa2[first_border:second_border]
+    child_a[second_border:parent_length] = pa1[second_border:parent_length]
+
+    # Create child b    
+    child_b[0:first_border] = pa2[0:first_border]
+    child_b[first_border:second_border] = pa1[first_border:second_border]
+    child_b[second_border:parent_length] = pa2[second_border:parent_length]
+    
+    return Solution(child_a), Solution(child_b)
+
+def uniform_xover(pa1, pa2):
+    child_a = np.zeros(len(pa1), dtype=bool)
+    child_b = np.zeros(len(pa1), dtype=bool)
+    
+    for i, (a, b) in enumerate(zip(pa1, pa2)):
+        options = [a, b]
+        
+        first = np.random.choice(options, 1)[0]
+        second = np.random.choice(options, 1)[0]
+        child_a[i] = first
+        child_b[i] = second
+    
+    if len(child_a) != len(pa1):
+        raise ValueError('oeps')
+    
+    return Solution(child_a), Solution(child_b)    
+
 def create_new_children(parents, n_crossover):
         pa1 = parents[0].value_vector
         pa2 = parents[1].value_vector
         
         # do uniform crossover
         if n_crossover == 0:
-            child_a = np.zeros(len(pa1), dtype=bool)
-            child_b = np.zeros(len(pa1), dtype=bool)
-    
-            for i, (a, b) in enumerate(zip(pa1, pa2)):
-                options = [a, b]
-                
-                first = np.random.choice(options, 1)[0]
-                second = np.random.choice(options, 1)[0]
-                child_a[i] += first
-                child_b[i] += second
-            
-            # child_a = mutate(child_a)
-            # child_b = mutate(child_b)
-            
-            return Solution(child_a), Solution(child_b)
-        
+            return uniform_xover(pa1, pa2)
+                    
         # do 2-point crossover
         elif n_crossover == 2:
-            child_a = np.zeros(len(pa1),dtype=bool)
-            child_b = np.zeros(len(pa1),dtype=bool)
-            # define edges for crossover points
-            borders = np.random.randint(0, high=len(pa1), size=2)
-            first_border, second_border = borders[0], borders[1]
-
-            
-            # if int(np.random.randint(0,high=100,size=1)) > 50:
-            #     child_a[0:first_border] += pa1[0:first_border]
-            #     child_a[first_border:second_border] += pa2[first_border:second_border]
-            #     child_a[second_border:len(pa1)] += pa1[second_border:len(pa1)]
-            # else:
-            #     child_a[0:first_border] += pa2[0:first_border]
-            #     child_a[first_border:second_border] += pa1[first_border:second_border]
-            #     child_a[second_border:len(pa1)] += pa2[second_border:len(pa1)]
-            
-            child_a[0:first_border] = pa1[0:first_border]
-            child_a[first_border:second_border] = pa2[first_border:second_border]
-            child_a[second_border:len(pa1)] = pa1[second_border:len(pa1)]
-            
-            child_b[0:first_border] = pa2[0:first_border]
-            child_b[first_border:second_border] = pa1[first_border:second_border]
-            child_b[second_border:len(pa1)] = pa2[second_border:len(pa1)]
-            
-            
-            
-            # child_a = mutate(child_a)
-            # child_b = mutate(child_b)
-            
-            if len(child_b) != len(pa1) or len(child_a) != len(pa1):
-                print('AHAAAAAAAAAHHH') # haha
-            
-            return Solution(child_a), Solution(child_b)   
-                
+            return n_point_xover(pa1, pa2)
+                 
         else:
             raise ValueError('{}-point crossover is currently not supported'.format(n_crossover))
                 
         
         
-    
 class Population():
     
     def __init__(self, solutions_list:list, previous_iter:int):
@@ -166,16 +159,21 @@ class Population():
             return self.fitness
     
     def global_optimum_reached(self, optimum, valuefunc):
+        if not self.fitness:
+            self.fitness = self.best_solution_fitness(valuefunc)
+        
         if np.max(self.fitness) == optimum:
             return True
         return False
     
     def best_solution_fitness(self, valuefunc):
+        start = time.time()
         values = []
         for to_check in self.solutions:
             value = valuefunc(to_check)
             values.append(value)
         
+        # print('Fitness: {:.2f}'.format(time.time() - start))
         return max(values)
 
     def step_gen(self, crossover_operator, valuefunc, cores):
@@ -197,6 +195,7 @@ class Population():
             self.new_pairs.append((parent_one, parent_two))
 
     def create_offspring(self, crossover_operator, cores):
+        start = time.time()
         if cores == 1:
             for parent in self.new_pairs:            
                 first_child, second_child = create_new_children(parent, crossover_operator)
@@ -212,9 +211,12 @@ class Population():
             for c1, c2 in children:
                 self.offspring.append(c1)
                 self.offspring.append(c2)
+        
+        # print('Crossover: {:.2f}'.format(time.time() - start))
                 
     
     def family_competition(self, valuefunc):
+        start = time.time()
         best_children = []
         # sample families (2 parents and those children)        
         
@@ -254,7 +256,8 @@ class Population():
             #     best_sol = candidates.pop(max_idx)
             #     function_values.pop(max_idx)
             #     best_children.append(best_sol)
-                
+        
+        # print('Competition: {:.2f}'.format(time.time() - start))        
         return best_children
     
     def proportion_bits1_population(self):
