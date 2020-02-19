@@ -77,7 +77,9 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
             res['proportions'].append(gen_x.proportion_bits1_population())
             
             plt.plot(counter, props)
+            plt.title('N={}'.format(N))
             plt.show()
+            
             last_N = N
             N *= 2
         

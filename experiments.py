@@ -11,10 +11,10 @@ import Builder as Builder
 
 POP_START = 10
 POP_MAX = 1280
-N_ITERS = 5
+N_ITERS = 2
 STRING_LENGTH = 100
 GLOBAL_OPTIMUM = STRING_LENGTH
-MAX_GENS = 20
+MAX_GENS = 100
 N_CORES = -2 # All but 1
 
 # =============================================================================
@@ -88,7 +88,23 @@ results_4b = exp_helperfunctions.run_exp(pop_start_size=POP_START, pop_max_size=
             n_iters=N_ITERS, string_length=STRING_LENGTH,value_func=Builder.dec_non_linked_trap_fitness,\
             global_optimum = GLOBAL_OPTIMUM, crossover_operator=0, max_gens=MAX_GENS, n_cores=N_CORES)     
     
-    
+
+# =============================================================================
+# #5 - non-linked non-deceptive trap with 2X crossover
+# =============================================================================
+print('\nEXPERIMENT 5a: 2X')
+results_5a = exp_helperfunctions.run_exp(pop_start_size=POP_START, pop_max_size=POP_MAX,\
+            n_iters=N_ITERS, string_length=STRING_LENGTH,value_func=Builder.non_dec_non_linked_trap_fitness,\
+            global_optimum = GLOBAL_OPTIMUM, crossover_operator=2, max_gens=MAX_GENS, n_cores=N_CORES) 
+
+
+# =============================================================================
+# #5 - non-linked non-deceptive trap with UX crossover
+# =============================================================================
+print('\nEXPERIMENT 5b: UX')
+results_5b = exp_helperfunctions.run_exp(pop_start_size=POP_START, pop_max_size=POP_MAX,\
+            n_iters=N_ITERS, string_length=STRING_LENGTH,value_func=Builder.non_dec_non_linked_trap_fitness,\
+            global_optimum = GLOBAL_OPTIMUM, crossover_operator=0, max_gens=MAX_GENS, n_cores=N_CORES)     
     
     
     

@@ -25,6 +25,7 @@ class Solution():
 def counting_ones_fitness_func(solution):
     return np.sum(solution.value_vector)
 
+
 def dec_linked_trap_fitness(solution, k=4, d=1):
     co = counting_ones_fitness_func(solution)
     if co % k == 0 and co > 0:
@@ -33,14 +34,6 @@ def dec_linked_trap_fitness(solution, k=4, d=1):
         return k - d - ((k - d) / (k - 1)) * co
 
 
-def non_dec_linked_trap_fitness(solution, k=4, d=2.5):
-    co = counting_ones_fitness_func(solution)
-    if co % k == 0 and co > 0:
-        return co
-    else:
-        return k - d - ((k - d) / (k - 1)) * co
-
-# TODO: Non-linked functions
 def dec_non_linked_trap_fitness(solution):
     if solution.length % 4 != 0:
         raise ValueError("Input must be multiple of 4")
@@ -56,15 +49,37 @@ def dec_non_linked_trap_fitness(solution):
         
         fitness.append(dec_linked_trap_fitness(Solution(f)))
     
-    return sum(f)
+    return sum(fitness)
 
-        
-def mutate(solution):
-        # mutate_location = np.random.randint(0, len(solution), 1)[0]
-        # solution[mutate_location] = np.invert(solution[mutate_location])
-        
-        return solution
 
+def non_dec_linked_trap_fitness(solution, k=4, d=2.5):
+    co = counting_ones_fitness_func(solution)
+    if co % k == 0 and co > 0:
+        return co
+    else:
+        return k - d - ((k - d) / (k - 1)) * co
+
+
+def non_dec_non_linked_trap_fitness(solution):
+    if solution.length % 4 != 0:
+        raise ValueError("Input must be multiple of 4")
+    
+    fitness = []
+    stepsize = int(solution.length / 4)
+    
+    for i in range(stepsize):
+        f = [solution.value_vector[i],
+             solution.value_vector[i + stepsize],
+             solution.value_vector[i + stepsize * 2],
+             solution.value_vector[i + stepsize * 3]]
+        
+        fitness.append(non_dec_linked_trap_fitness(Solution(f)))
+    
+    return sum(fitness)
+
+# =============================================================================
+# Crossover function
+# =============================================================================
 def create_new_children(parents, n_crossover):
         pa1 = parents[0].value_vector
         pa2 = parents[1].value_vector
@@ -138,14 +153,20 @@ class Population():
         self.offspring = []
         self.population_size = len(solutions_list)
         
+        self.fitness = None
+        
 
     def get_fitness(self, optimum, valuefunc):
-        return (self.global_optimum_reached(optimum, valuefunc), 
-                self.best_solution_fitness(valuefunc))
+        if not self.fitness:
+            self.fitness = self.best_solution_fitness(valuefunc)
+            
+            return (self.global_optimum_reached(optimum, valuefunc), 
+                    self.fitness)
+        else:
+            return self.fitness
     
     def global_optimum_reached(self, optimum, valuefunc):
-        function_values = [valuefunc(sol) for sol in self.solutions]
-        if max(function_values) == optimum:
+        if np.max(self.fitness) == optimum:
             return True
         return False
     
@@ -194,11 +215,8 @@ class Population():
                 
     
     def family_competition(self, valuefunc):
-        
         best_children = []
-        # sample families (2 parents and those children)
-        best_sols = []
-        
+        # sample families (2 parents and those children)        
         
         for i in range(0,len(self.solutions),2):
             candidates = []
@@ -209,11 +227,9 @@ class Population():
             candidates.append(self.offspring[i])
             candidates.append(self.offspring[i+1])
           
-            # check the fittest solutions for this family
-            
-            
             function_values = np.array([valuefunc(sol) for sol in candidates])
-            # check if fitness of any children is equal to one of the parents, if this is true, delete from possible candidates
+            # check if fitness of any children is equal to one of the parents, 
+            # if this is true, delete from possible candidates
             par_1 = function_values[0]
             par_2 = function_values[1]
             to_del = []
@@ -239,7 +255,6 @@ class Population():
             #     function_values.pop(max_idx)
             #     best_children.append(best_sol)
                 
-        
         return best_children
     
     def proportion_bits1_population(self):
@@ -252,20 +267,5 @@ class Population():
         
 
 
-
-        
-        
-            
-            
-            
-            
-        
-        
-        
-        
-    
-    
-        
-        
-        
+  
     
