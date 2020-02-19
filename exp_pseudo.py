@@ -31,7 +31,7 @@ def generate(generation, optimum, fitness_func, crossover_operator):
     return new_gen
     
     
-N = 10
+N = 40
 glob_opt = 100
 max_gen_iters = 100
 n_cores = 1
