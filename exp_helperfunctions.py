@@ -85,10 +85,6 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
         ### Optimum was found. Do bisection search ###
         ##############################################            
         if optimum_found:
-            # do plotting
-            plt.figure(figsize=(10,10), dpi=300)
-            plt.plot(res['generation_iter'], res['proportions'])
-            plt.show()
             stepsize = (last_N - last_N / 2) / 2
             N = last_N - stepsize
             

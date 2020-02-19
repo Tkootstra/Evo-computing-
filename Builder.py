@@ -41,7 +41,24 @@ def non_dec_linked_trap_fitness(solution, k=4, d=2.5):
         return k - d - ((k - d) / (k - 1)) * co
 
 # TODO: Non-linked functions
+def dec_non_linked_trap_fitness(solution):
+    if solution.length % 4 != 0:
+        raise ValueError("Input must be multiple of 4")
+    
+    fitness = []
+    stepsize = int(solution.length / 4)
+    
+    for i in range(stepsize):
+        f = [solution.value_vector[i],
+             solution.value_vector[i + stepsize],
+             solution.value_vector[i + stepsize * 2],
+             solution.value_vector[i + stepsize * 3]]
+        
+        fitness.append(dec_linked_trap_fitness(Solution(f)))
+    
+    return sum(f)
 
+        
 def mutate(solution):
         # mutate_location = np.random.randint(0, len(solution), 1)[0]
         # solution[mutate_location] = np.invert(solution[mutate_location])
