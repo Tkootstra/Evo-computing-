@@ -35,6 +35,8 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
         optimum_found = False
         
         while N <= pop_max_size and not optimum_found:
+            props = []
+            counter = []
             num_gens = 1
             
             sols = create_solutions(N, string_length)
@@ -52,16 +54,19 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
             
             gen_x = new_gen
         
-            while not optimum_found and current_optimum <= next_optimum and num_gens < max_gens:
+            while not optimum_found and current_optimum <= next_optimum and num_gens <= max_gens:
                 current_optimum = next_optimum
                 
                 # Create and select offspring
                 best_offspring = gen_x.step_gen(crossover_operator, value_func, cores=n_cores)
                 
                 # Build new generation and check fitness
+                
                 new_gen = Builder.Population(solutions_list=best_offspring, previous_iter = gen_x.current_iter)
+                
                 optimum_found, next_optimum = new_gen.get_fitness(global_optimum, value_func)
-
+                props.append(next_optimum)
+                counter.append(num_gens)
                 gen_x = new_gen
                 num_gens += 1
                 
@@ -71,10 +76,11 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
             res['generation_iter'].append(gen_x.current_iter)
             res['proportions'].append(gen_x.proportion_bits1_population())
             
-            
+            plt.plot(counter, props)
+            plt.show()
             last_N = N
             N *= 2
-
+        
         ##############################################
         ### Optimum was found. Do bisection search ###
         ##############################################            

@@ -73,6 +73,7 @@ def create_new_children(parents, n_crossover):
         # do 2-point crossover
         elif n_crossover == 2:
             child_a = np.zeros(len(pa1),dtype=bool)
+            child_b = np.zeros(len(pa1),dtype=bool)
             # define edges for crossover points
             borders = np.random.randint(0, high=len(pa1), size=2)
             first_border, second_border = borders[0], borders[1]
@@ -91,7 +92,11 @@ def create_new_children(parents, n_crossover):
             child_a[first_border:second_border] = pa2[first_border:second_border]
             child_a[second_border:len(pa1)] = pa1[second_border:len(pa1)]
             
-            child_b = np.invert(child_a)
+            child_b[0:first_border] = pa2[0:first_border]
+            child_b[first_border:second_border] = pa1[first_border:second_border]
+            child_b[second_border:len(pa1)] = pa2[second_border:len(pa1)]
+            
+            
             
             # child_a = mutate(child_a)
             # child_b = mutate(child_b)
@@ -115,6 +120,7 @@ class Population():
         self.new_pairs = []
         self.offspring = []
         self.population_size = len(solutions_list)
+        
 
     def get_fitness(self, optimum, valuefunc):
         return (self.global_optimum_reached(optimum, valuefunc), 
@@ -174,24 +180,48 @@ class Population():
         
         best_children = []
         # sample families (2 parents and those children)
-    
+        best_sols = []
+        
+        
         for i in range(0,len(self.solutions),2):
             candidates = []
+            
+            
             candidates.append(self.solutions[i])
             candidates.append(self.solutions[i+1])
             candidates.append(self.offspring[i])
             candidates.append(self.offspring[i+1])
-            
-            # for cand in candidates:
-            #     print(cand.value_vector)
-            
+          
             # check the fittest solutions for this family
+            
+            
             function_values = np.array([valuefunc(sol) for sol in candidates])
-            best_idx = function_values.argsort()[::-1]
+            # check if fitness of any children is equal to one of the parents, if this is true, delete from possible candidates
+            par_1 = function_values[0]
+            par_2 = function_values[1]
+            to_del = []
+            for ii in range(2,4):
+                child = function_values[ii]
+                if child == par_1:
+                    to_del.append(0)
+                elif child == par_2:
+                    to_del.append(1)
+                    
+            function_values = [v for i,v in enumerate(function_values) if i not in to_del]
+            candidates = [v for i,v in enumerate(candidates) if i not in to_del]
+                
+            best_idx = np.array(function_values).argsort()[::-1]
             
             # append 2 best solution to list
             best_children.append(candidates[best_idx[0]])
             best_children.append(candidates[best_idx[1]])
+            # for n in range(2):
+            #     # print(len(function_values))
+            #     max_idx = function_values.index(max(function_values))
+            #     best_sol = candidates.pop(max_idx)
+            #     function_values.pop(max_idx)
+            #     best_children.append(best_sol)
+                
         
         return best_children
     

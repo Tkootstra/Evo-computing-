@@ -9,9 +9,9 @@ Created on Thu Feb  6 14:24:20 2020
 import exp_helperfunctions
 import Builder as Builder
 
-POP_START = 10
+POP_START = 1200
 POP_MAX = 1280
-N_ITERS = 5
+N_ITERS = 1
 STRING_LENGTH = 100
 GLOBAL_OPTIMUM = STRING_LENGTH
 MAX_GENS = 100
