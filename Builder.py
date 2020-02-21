@@ -145,6 +145,7 @@ class Population():
         self.new_pairs = []
         self.offspring = []
         self.population_size = len(solutions_list)
+        self.best_children = []
         
         self.fitness = None
         
@@ -181,8 +182,9 @@ class Population():
         self.pair_solutions()
         self.create_offspring(crossover_operator, cores=cores)
         
-        return self.family_competition(valuefunc)
-        
+        self.family_competition(valuefunc)
+        return self.best_children
+    
     def shuffle_population(self):
         sols = self.solutions
         random.shuffle(sols)
@@ -258,7 +260,7 @@ class Population():
             #     best_children.append(best_sol)
         
         # print('Competition: {:.2f}'.format(time.time() - start))        
-        return best_children
+        self.best_children = best_children
     
     def proportion_bits1_population(self):
         total_sum = 0
@@ -266,6 +268,34 @@ class Population():
         for sol in self.solutions:
             total_sum += counting_ones_fitness_func(sol)
         return total_sum / (length * self.population_size)
+    
+    def selection_errors_gen(self):
+        # this method returns the selection errors/correct for this generation. 
+        # errors are defined as when parents have 1 and 0 bit at index i, 
+        # and the winners of the family competition (self.best_children) have a 0 bit at this index.
+        # the other way around for correct: 1 bit at index i for the winners of family competition
+        if self.best_children == []:
+            raise ValueError("selection errors can't be calculated before family competition")
+            
+        selection_correct = 0
+        selection_error = 0
+        for i in range(0,len(self.solutions),2):
+            pa1, pa2 = self.solutions[i].value_vector, self.solutions[i+1].value_vector
+            child1, child2 = self.best_children[i].value_vector, self.best_children[i+1].value_vector
+            diff_idx = list(np.argwhere((pa1-pa2) != 0))
+            for ii in diff_idx:
+                if child1[ii] and child2[ii] == 0:
+                    selection_error+=1
+                elif child1[ii] and child2[ii] == 1:
+                    selection_error+=1
+                    
+        return selection_correct, selection_error
+
+    def competing_schemata
+                    
+                
+    
+    
     
         
 
