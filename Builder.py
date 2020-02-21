@@ -291,7 +291,23 @@ class Population():
                     
         return selection_correct, selection_error
 
-    def competing_schemata
+    def competing_schemata(self, fitness_function):
+        schema_0_counter = 0
+        schema_1_counter = 0
+        fitness_1_schema = []
+        fitness_0_schema = []
+        for sol in self.solutions:
+            if sol.value_vector[0] == 0:
+                schema_0_counter +=1
+                fitness_0_schema.append(fitness_function(sol))
+            else:
+                schema_1_counter+=1
+                fitness_1_schema.append(fitness_function(sol))
+                
+        return schema_0_counter, schema_1_counter, np.mean(fitness_0_schema),\
+            np.std(fitness_0_schema), np.mean(fitness_1_schema), np.std(fitness_1_schema)
+            
+        
                     
                 
     
