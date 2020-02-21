@@ -287,7 +287,7 @@ class Population():
                 if child1[ii] and child2[ii] == 0:
                     selection_error+=1
                 elif child1[ii] and child2[ii] == 1:
-                    selection_error+=1
+                    selection_correct+=1
                     
         return selection_correct, selection_error
 
