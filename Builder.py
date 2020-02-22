@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy
 # -*- coding: utf-8 -*-
 """
 Created on Thu Feb  6 12:23:03 2020
@@ -8,23 +8,22 @@ Created on Thu Feb  6 12:23:03 2020
 # =============================================================================
 # Builder classes solution and population. Use the functions of these classes to initiate the GA
 # =============================================================================
-import numpy as np
 import random
-from joblib import Parallel, delayed 
+import statistics
 import time
+#from joblib import Parallel, delayed 
 
 class Solution():
     
-    def __init__(self, values:np.array):
-        
-        self.value_vector = np.array(values, dtype=bool)
+    def __init__(self, values):
+        self.value_vector = [bool(v) for v in values]
         self.length = len(self.value_vector)
 
 # =============================================================================
 #     fitness functions
 # =============================================================================
 def counting_ones_fitness_func(solution):
-    return np.sum(solution.value_vector)
+    return sum(solution.value_vector)
 
 
 def dec_linked_trap_fitness(solution, k=4, d=1):
@@ -84,11 +83,11 @@ def non_dec_non_linked_trap_fitness(solution):
 def n_point_xover(pa1, pa2):
     parent_length = len(pa1)
     
-    child_a = np.zeros(parent_length,dtype=bool)
-    child_b = np.zeros(parent_length,dtype=bool)
+    child_a = [False] * parent_length
+    child_b = [False] * parent_length
     
     # define edges for crossover points
-    borders = np.random.randint(0, high=parent_length, size=2)
+    borders = sorted([random.randint(0, parent_length) for i in range(2)])
     first_border, second_border = borders[0], borders[1]
     
     # Create child a
@@ -104,14 +103,16 @@ def n_point_xover(pa1, pa2):
     return Solution(child_a), Solution(child_b)
 
 def uniform_xover(pa1, pa2):
-    child_a = np.zeros(len(pa1), dtype=bool)
-    child_b = np.zeros(len(pa1), dtype=bool)
+    parent_length = len(pa1)
+    
+    child_a = [False] * parent_length
+    child_b = [False] * parent_length
     
     for i, (a, b) in enumerate(zip(pa1, pa2)):
         options = [a, b]
         
-        first = np.random.choice(options, 1)[0]
-        second = np.random.choice(options, 1)[0]
+        first = random.choice(options)
+        second = random.choice(options)
         child_a[i] = first
         child_b[i] = second
     
@@ -163,12 +164,12 @@ class Population():
         if not self.fitness:
             self.fitness = self.best_solution_fitness(valuefunc)
         
-        if np.max(self.fitness) == optimum:
+        if self.fitness == optimum:
             return True
         return False
     
     def best_solution_fitness(self, valuefunc):
-        start = time.time()
+#        start = time.time()
         values = []
         for to_check in self.solutions:
             value = valuefunc(to_check)
@@ -197,28 +198,28 @@ class Population():
             self.new_pairs.append((parent_one, parent_two))
 
     def create_offspring(self, crossover_operator, cores):
-        start = time.time()
+#        start = time.time()
         if cores == 1:
             for parent in self.new_pairs:            
                 first_child, second_child = create_new_children(parent, crossover_operator)
                 self.offspring.append(first_child)
                 self.offspring.append(second_child) 
        
-        else:
-            xovers = [crossover_operator] * len(self.new_pairs)
-            
-            children = Parallel(n_jobs=-2, backend='loky', verbose=False)(
-                delayed(create_new_children)(pa, xover) for pa, xover in zip(self.new_pairs, xovers))
-            
-            for c1, c2 in children:
-                self.offspring.append(c1)
-                self.offspring.append(c2)
+#        else:
+#            xovers = [crossover_operator] * len(self.new_pairs)
+#            
+#            children = Parallel(n_jobs=-2, backend='loky', verbose=False)(
+#                delayed(create_new_children)(pa, xover) for pa, xover in zip(self.new_pairs, xovers))
+#            
+#            for c1, c2 in children:
+#                self.offspring.append(c1)
+#                self.offspring.append(c2)
         
         # print('Crossover: {:.2f}'.format(time.time() - start))
                 
     
     def family_competition(self, valuefunc):
-        start = time.time()
+#        start = time.time()
         best_children = []
         # sample families (2 parents and those children)        
         
@@ -231,7 +232,7 @@ class Population():
             candidates.append(self.offspring[i])
             candidates.append(self.offspring[i+1])
           
-            function_values = np.array([valuefunc(sol) for sol in candidates])
+            function_values = [valuefunc(sol) for sol in candidates]
             # check if fitness of any children is equal to one of the parents, 
             # if this is true, delete from possible candidates
             par_1 = function_values[0]
@@ -247,11 +248,12 @@ class Population():
             function_values = [v for i,v in enumerate(function_values) if i not in to_del]
             candidates = [v for i,v in enumerate(candidates) if i not in to_del]
                 
-            best_idx = np.array(function_values).argsort()[::-1]
+#            best_idx = np.array(function_values).argsort()[::-1]
+            best_idx = [c for _, c in sorted(zip(function_values, candidates), key=lambda pair: pair[0], reverse=True)]
             
             # append 2 best solution to list
-            best_children.append(candidates[best_idx[0]])
-            best_children.append(candidates[best_idx[1]])
+            best_children.append(best_idx[0])
+            best_children.append(best_idx[1])
             # for n in range(2):
             #     # print(len(function_values))
             #     max_idx = function_values.index(max(function_values))
@@ -282,7 +284,8 @@ class Population():
         for i in range(0,len(self.solutions),2):
             pa1, pa2 = self.solutions[i].value_vector, self.solutions[i+1].value_vector
             child1, child2 = self.best_children[i].value_vector, self.best_children[i+1].value_vector
-            diff_idx = list(np.argwhere((pa1-pa2) != 0))
+            diff_idx = [i for i, p1, p2 in enumerate(zip(pa1, pa2)) if p1 - p2 != 0]
+#            diff_idx = list(np.argwhere((pa1-pa2) != 0))
             for ii in diff_idx:
                 if child1[ii] and child2[ii] == 0:
                     selection_error+=1
@@ -304,8 +307,13 @@ class Population():
                 schema_1_counter+=1
                 fitness_1_schema.append(fitness_function(sol))
                 
-        return schema_0_counter, schema_1_counter, np.mean(fitness_0_schema),\
-            np.std(fitness_0_schema), np.mean(fitness_1_schema), np.std(fitness_1_schema)
+        mean_schema_0 = sum(fitness_0_schema) / len(fitness_0_schema)
+        sd_schema_0 = statistics.stdev(fitness_0_schema)
+        mean_schema_1 = sum(fitness_1_schema) / len(fitness_1_schema)
+        sd_schema_1 = statistics.stdev(fitness_1_schema) 
+                
+        return schema_0_counter, schema_1_counter, mean_schema_0,\
+            sd_schema_0, mean_schema_1, sd_schema_1
             
         
                     

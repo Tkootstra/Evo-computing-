@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy
 # -*- coding: utf-8 -*-
 """
 Created on Thu Feb  6 14:24:20 2020
@@ -10,13 +10,18 @@ import exp_helperfunctions
 import Builder as Builder
 import pickle
 
+# conda create --name evocomp python=3.6 spyder cloudpickle matplotlib
+# conda activate evocomp
+# conda install -c conda-forge pypy3.6
+
+
 POP_START = 10
 POP_MAX = 1280
-N_ITERS = 25
+N_ITERS = 2
 STRING_LENGTH = 100
 GLOBAL_OPTIMUM = STRING_LENGTH
 MAX_GENS = 500
-N_CORES = -2 # All but 1
+N_CORES = 1 # All but 1
 
 # =============================================================================
 # #1 - counting ones valuefunc with 2X crossover
