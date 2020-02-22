@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy
 # -*- coding: utf-8 -*-
 """
 Created on Thu Feb  6 17:22:08 2020
@@ -6,15 +6,19 @@ Created on Thu Feb  6 17:22:08 2020
 @author: timo
 """
 import Builder as Builder
-import numpy as np
+#import numpy as np
+import random
 import time
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 def create_solutions(n, string_length):
     sols = []
     for i in range(n):
-        values = np.random.randint(2, size=string_length)
+        values = []
+        for s in range(string_length):
+            values.append(random.randint(0, 1))
+#        values = np.random.randint(2, size=string_length)
         sol = Builder.Solution(values)
         sols.append(sol)
     
@@ -146,7 +150,7 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
             
         
         fitness = (max(res['best_fitness']) / global_optimum) * 100
-        mean_gens = np.mean(res['generation_iter'])
+        mean_gens = sum(res['generation_iter']) / len(res['generation_iter'])
         
         end = time.time()
         print('{0}: Found global fitness max of {1:.0f}%, N={2} ({3:.2f}s, {4:.2f} gens)'.format(x + 1, 
