@@ -10,6 +10,11 @@ import exp_helperfunctions
 import Builder as Builder
 import pickle
 
+# conda create --name evocomp python=3.6 spyder cloudpickle matplotlib
+# conda activate evocomp
+# conda install -c conda-forge pypy3.6
+
+
 POP_START = 10
 POP_MAX = 1280
 N_ITERS = 2

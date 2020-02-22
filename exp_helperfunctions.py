@@ -6,10 +6,9 @@ Created on Thu Feb  6 17:22:08 2020
 @author: timo
 """
 import Builder as Builder
-#import numpy as np
 import random
 import time
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 def create_solutions(n, string_length):
@@ -83,9 +82,9 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
             res['generation_iter'].append(num_gens)
             res['proportions'].append(gen_x.proportion_bits1_population())
             
-            # plt.plot(counter, props)
-            # plt.title('N={}'.format(N))
-            # plt.show()
+#            plt.plot(counter, props)
+#            plt.title('N={}'.format(N))
+#            plt.show()
             
             last_N = N
             N *= 2

@@ -8,15 +8,14 @@ Created on Thu Feb  6 12:23:03 2020
 # =============================================================================
 # Builder classes solution and population. Use the functions of these classes to initiate the GA
 # =============================================================================
-#import numpy as np
 import random
+import statistics
 import time
 #from joblib import Parallel, delayed 
 
 class Solution():
     
     def __init__(self, values):
-        
         self.value_vector = [bool(v) for v in values]
         self.length = len(self.value_vector)
 
@@ -170,7 +169,7 @@ class Population():
         return False
     
     def best_solution_fitness(self, valuefunc):
-        start = time.time()
+#        start = time.time()
         values = []
         for to_check in self.solutions:
             value = valuefunc(to_check)
@@ -199,7 +198,7 @@ class Population():
             self.new_pairs.append((parent_one, parent_two))
 
     def create_offspring(self, crossover_operator, cores):
-        start = time.time()
+#        start = time.time()
         if cores == 1:
             for parent in self.new_pairs:            
                 first_child, second_child = create_new_children(parent, crossover_operator)
@@ -220,7 +219,7 @@ class Population():
                 
     
     def family_competition(self, valuefunc):
-        start = time.time()
+#        start = time.time()
         best_children = []
         # sample families (2 parents and those children)        
         
@@ -272,43 +271,49 @@ class Population():
             total_sum += counting_ones_fitness_func(sol)
         return total_sum / (length * self.population_size)
     
-#    def selection_errors_gen(self):
-#        # this method returns the selection errors/correct for this generation. 
-#        # errors are defined as when parents have 1 and 0 bit at index i, 
-#        # and the winners of the family competition (self.best_children) have a 0 bit at this index.
-#        # the other way around for correct: 1 bit at index i for the winners of family competition
-#        if self.best_children == []:
-#            raise ValueError("selection errors can't be calculated before family competition")
-#            
-#        selection_correct = 0
-#        selection_error = 0
-#        for i in range(0,len(self.solutions),2):
-#            pa1, pa2 = self.solutions[i].value_vector, self.solutions[i+1].value_vector
-#            child1, child2 = self.best_children[i].value_vector, self.best_children[i+1].value_vector
+    def selection_errors_gen(self):
+        # this method returns the selection errors/correct for this generation. 
+        # errors are defined as when parents have 1 and 0 bit at index i, 
+        # and the winners of the family competition (self.best_children) have a 0 bit at this index.
+        # the other way around for correct: 1 bit at index i for the winners of family competition
+        if self.best_children == []:
+            raise ValueError("selection errors can't be calculated before family competition")
+            
+        selection_correct = 0
+        selection_error = 0
+        for i in range(0,len(self.solutions),2):
+            pa1, pa2 = self.solutions[i].value_vector, self.solutions[i+1].value_vector
+            child1, child2 = self.best_children[i].value_vector, self.best_children[i+1].value_vector
+            diff_idx = [i for i, p1, p2 in enumerate(zip(pa1, pa2)) if p1 - p2 != 0]
 #            diff_idx = list(np.argwhere((pa1-pa2) != 0))
-#            for ii in diff_idx:
-#                if child1[ii] and child2[ii] == 0:
-#                    selection_error+=1
-#                elif child1[ii] and child2[ii] == 1:
-#                    selection_correct+=1
-#                    
-#        return selection_correct, selection_error
-#
-#    def competing_schemata(self, fitness_function):
-#        schema_0_counter = 0
-#        schema_1_counter = 0
-#        fitness_1_schema = []
-#        fitness_0_schema = []
-#        for sol in self.solutions:
-#            if sol.value_vector[0] == 0:
-#                schema_0_counter +=1
-#                fitness_0_schema.append(fitness_function(sol))
-#            else:
-#                schema_1_counter+=1
-#                fitness_1_schema.append(fitness_function(sol))
-#                
-#        return schema_0_counter, schema_1_counter, np.mean(fitness_0_schema),\
-#            np.std(fitness_0_schema), np.mean(fitness_1_schema), np.std(fitness_1_schema)
+            for ii in diff_idx:
+                if child1[ii] and child2[ii] == 0:
+                    selection_error+=1
+                elif child1[ii] and child2[ii] == 1:
+                    selection_correct+=1
+                    
+        return selection_correct, selection_error
+
+    def competing_schemata(self, fitness_function):
+        schema_0_counter = 0
+        schema_1_counter = 0
+        fitness_1_schema = []
+        fitness_0_schema = []
+        for sol in self.solutions:
+            if sol.value_vector[0] == 0:
+                schema_0_counter +=1
+                fitness_0_schema.append(fitness_function(sol))
+            else:
+                schema_1_counter+=1
+                fitness_1_schema.append(fitness_function(sol))
+                
+        mean_schema_0 = sum(fitness_0_schema) / len(fitness_0_schema)
+        sd_schema_0 = statistics.stdev(fitness_0_schema)
+        mean_schema_1 = sum(fitness_1_schema) / len(fitness_1_schema)
+        sd_schema_1 = statistics.stdev(fitness_1_schema) 
+                
+        return schema_0_counter, schema_1_counter, mean_schema_0,\
+            sd_schema_0, mean_schema_1, sd_schema_1
             
         
                     
