@@ -33,7 +33,7 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
     for x in range(n_iters):
         start = time.time()
         
-        res = {key: [] for key in ['Pop_size', 'best_fitness', 'generation_iter', 'proportions']}
+        res = {key: [] for key in ['Pop_size', 'best_fitness', 'generation_iter', 'proportions', 'eval_functions']}
         
         N = pop_start_size
         optimum_found = False
@@ -80,7 +80,7 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
             res['Pop_size'].append(N)
             res['best_fitness'].append(next_optimum)
             res['generation_iter'].append(num_gens)
-            res['proportions'].append(gen_x.proportion_bits1_population())
+            res['eval_functions'].append(num_gens * N)
             
 #            plt.plot(counter, props)
 #            plt.title('N={}'.format(N))
@@ -133,7 +133,7 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
                 res['Pop_size'].append(N)
                 res['best_fitness'].append(next_optimum)
                 res['generation_iter'].append(num_gens)
-                res['proportions'].append(gen_x.proportion_bits1_population())
+                res['eval_functions'].append(num_gens * N)
                 
                 # plt.plot(counter, props)
                 # plt.title('N={}'.format(N))

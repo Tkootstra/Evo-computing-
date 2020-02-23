@@ -28,6 +28,8 @@ for filename in filenames:
     result_dicts = f['res_dict']
     pop_sizes = [r['Pop_size'][-1] for r in result_dicts]
     generations = [r['generation_iter'][-1] for r in result_dicts]
+#    eval_funcs = [r['eval_functions'][-1] for r in result_dicts]
+    eval_funcs = [r['generation_iter'][-1] * r['Pop_size'][-1] for r in result_dicts]
     
     
     print(filename)
@@ -36,7 +38,7 @@ for filename in filenames:
     print('Popsize = {}'.format(min(pop_sizes)))
     print('Generations = {} ({})'.format(np.mean(generations),
                                          np.std(generations)))
-    print('Eval functions = {} ({})'.format('????', '?'))
+    print('Eval functions = {} ({})'.format(np.mean(eval_funcs), np.std(eval_funcs)))
     print('CPU time = {} ({})'.format(np.mean(cpu_times) / 60,
                                       np.std(cpu_times) / 60))
     print('\n')
