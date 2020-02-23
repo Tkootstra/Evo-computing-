@@ -10,7 +10,7 @@ import numpy as np
 import pickle
 
 
-filenames = ['1a.p', '1b.p', '2a.p', '2b.p', '3a.p', '3b.p']
+filenames = ['1a.p', '1b.p', '2a.p', '2b.p', '3a.p', '3b.p', '4a.p', '4b.p', '5a.p', '5b.p']
 
 files = []
 for filename in filenames:

@@ -276,7 +276,7 @@ class Population():
         # errors are defined as when parents have 1 and 0 bit at index i, 
         # and the winners of the family competition (self.best_children) have a 0 bit at this index.
         # the other way around for correct: 1 bit at index i for the winners of family competition
-        if self.best_children == []:
+        if len(self.best_children) == 0:
             raise ValueError("selection errors can't be calculated before family competition")
             
         selection_correct = 0
@@ -284,7 +284,7 @@ class Population():
         for i in range(0,len(self.solutions),2):
             pa1, pa2 = self.solutions[i].value_vector, self.solutions[i+1].value_vector
             child1, child2 = self.best_children[i].value_vector, self.best_children[i+1].value_vector
-            diff_idx = [i for i, p1, p2 in enumerate(zip(pa1, pa2)) if p1 - p2 != 0]
+            diff_idx = [i for i, (p1, p2) in enumerate(zip(pa1, pa2)) if p1 != p2]
 #            diff_idx = list(np.argwhere((pa1-pa2) != 0))
             for ii in diff_idx:
                 if child1[ii] and child2[ii] == 0:
@@ -299,6 +299,7 @@ class Population():
         schema_1_counter = 0
         fitness_1_schema = []
         fitness_0_schema = []
+        
         for sol in self.solutions:
             if sol.value_vector[0] == 0:
                 schema_0_counter +=1
@@ -306,14 +307,19 @@ class Population():
             else:
                 schema_1_counter+=1
                 fitness_1_schema.append(fitness_function(sol))
-                
-        mean_schema_0 = sum(fitness_0_schema) / len(fitness_0_schema)
-        sd_schema_0 = statistics.stdev(fitness_0_schema)
-        mean_schema_1 = sum(fitness_1_schema) / len(fitness_1_schema)
+        
+        if len(fitness_0_schema) > 1:        
+            mean_schema_0 = statistics.mean(fitness_0_schema)
+            sd_schema_0 = statistics.stdev(fitness_0_schema)
+        else:
+            mean_schema_0 = None
+            sd_schema_0 = None
+        
+        mean_schema_1 = statistics.mean(fitness_1_schema)
         sd_schema_1 = statistics.stdev(fitness_1_schema) 
                 
-        return schema_0_counter, schema_1_counter, mean_schema_0,\
-            sd_schema_0, mean_schema_1, sd_schema_1
+        return schema_0_counter, mean_schema_0, sd_schema_0,\
+               schema_1_counter, mean_schema_1, sd_schema_1
             
         
                     
