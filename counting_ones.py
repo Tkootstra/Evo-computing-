@@ -145,7 +145,7 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
                     res['best_fitness'].append(next_optimum)
                     res['generation_iter'].append(num_gens)
                     res['proportions'].append(gen_x.proportion_bits1_population())
-#                    res['selection_errors'].append(gen_x.selection_errors_gen())
+                    res['selection_errors'].append(gen_x.selection_errors_gen())
                     res['schemata'].append(gen_x.competing_schemata(value_func))
                 
                 # plt.plot(counter, props)
@@ -183,8 +183,8 @@ def run_exp(pop_start_size=10, pop_max_size=1280, n_iters=25, string_length=100,
 # Run
 # =============================================================================
     
-POP_START = 150
-POP_MAX = 150
+POP_START = 250
+POP_MAX = 250
 N_ITERS = 1
 STRING_LENGTH = 100
 GLOBAL_OPTIMUM = STRING_LENGTH

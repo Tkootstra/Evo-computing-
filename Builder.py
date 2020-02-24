@@ -281,15 +281,15 @@ class Population():
             
         selection_correct = 0
         selection_error = 0
-        for i in range(0,len(self.solutions),2):
+        for i in range(0, len(self.solutions), 2):
             pa1, pa2 = self.solutions[i].value_vector, self.solutions[i+1].value_vector
             child1, child2 = self.best_children[i].value_vector, self.best_children[i+1].value_vector
             diff_idx = [i for i, (p1, p2) in enumerate(zip(pa1, pa2)) if p1 != p2]
 #            diff_idx = list(np.argwhere((pa1-pa2) != 0))
             for ii in diff_idx:
-                if child1[ii] and child2[ii] == 0:
+                if child1[ii] == 0 and child2[ii] == 0:
                     selection_error+=1
-                elif child1[ii] and child2[ii] == 1:
+                elif child1[ii] == 1 and child2[ii] == 1:
                     selection_correct+=1
                     
         return selection_correct, selection_error
